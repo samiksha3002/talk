@@ -11,11 +11,20 @@
         text-align: center;
         background-color: #f7f7f7;
       }
+      select,
+      button,
+      textarea {
+        margin-top: 20px;
+      }
+      select {
+        font-size: 16px;
+        padding: 10px;
+        border-radius: 6px;
+      }
       #output {
         width: 90%;
         height: 100px;
         font-size: 18px;
-        margin-top: 20px;
         padding: 10px;
       }
       button {
@@ -26,7 +35,7 @@
         color: white;
         border: none;
         border-radius: 8px;
-        margin-top: 20px;
+        margin-left: 10px;
       }
       button:hover {
         background-color: #45a049;
@@ -35,8 +44,24 @@
   </head>
   <body>
     <h1>🎤 Talk-to-Type Demo</h1>
-    <p>Click the button and start speaking...</p>
+    <p>Select your language and click the button to speak</p>
+
+    <select id="languageSelect">
+      <option value="en-IN">English (India)</option>
+      <option value="hi-IN">Hindi (हिंदी)</option>
+      <option value="mr-IN">Marathi (मराठी)</option>
+      <option value="gu-IN">Gujarati (ગુજરાતી)</option>
+      <option value="ta-IN">Tamil (தமிழ்)</option>
+      <option value="te-IN">Telugu (తెలుగు)</option>
+      <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+      <option value="bn-IN">Bengali (বাংলা)</option>
+      <option value="ur-IN">Urdu (اُردو)</option>
+      <option value="en-US">English (US)</option>
+    </select>
+
     <button id="talkBtn">Start Talking</button>
+
+    <br />
     <textarea
       id="output"
       placeholder="Your speech will appear here..."
@@ -45,6 +70,7 @@
     <script>
       const talkBtn = document.getElementById("talkBtn");
       const output = document.getElementById("output");
+      const languageSelect = document.getElementById("languageSelect");
 
       talkBtn.addEventListener("click", () => {
         if (!("webkitSpeechRecognition" in window)) {
@@ -57,7 +83,7 @@
         const recognition = new webkitSpeechRecognition();
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.lang = "en-IN"; // Change to 'hi-IN' for Hindi
+        recognition.lang = languageSelect.value;
 
         recognition.onstart = () => {
           talkBtn.innerText = "Listening...";
@@ -80,7 +106,7 @@
 
         setTimeout(() => {
           recognition.start();
-        }, 500); // Delay to avoid "aborted" issue
+        }, 500); // Fix for "aborted" bug
       });
     </script>
   </body>
