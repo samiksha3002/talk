@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TalknType - Voice to Text</title>
-
     <style>
       * {
         margin: 0;
@@ -21,7 +20,6 @@
         background-color: #f4f4f4;
       }
 
-      /* SLIDER */
       .carousel {
         position: relative;
         width: 100%;
@@ -64,7 +62,6 @@
         background-color: #fff;
       }
 
-      /* HEADER */
       header {
         background: white;
         text-align: center;
@@ -86,7 +83,6 @@
         max-width: 150px;
       }
 
-      /* VOICE BOX */
       .voice-box {
         padding: 40px 20px;
         background-color: #fff;
@@ -155,15 +151,12 @@
         header img {
           max-width: 100px;
         }
-
         h2 {
           font-size: 20px;
         }
-
         textarea {
           height: 150px;
         }
-
         .carousel {
           height: 60vh;
         }
@@ -176,9 +169,7 @@
       }
     </style>
   </head>
-
   <body>
-    <!-- SLIDER -->
     <div class="carousel">
       <img src="Image.jpg" class="active" alt="Slider 1" />
       <img src="Image2.jpg" alt="Slider 2" />
@@ -188,12 +179,10 @@
       </div>
     </div>
 
-    <!-- HEADER -->
     <header>
       <img src="logo.jpg" alt="TalknType Logo" />
     </header>
 
-    <!-- VOICE BOX -->
     <section class="voice-box">
       <div class="voice-container">
         <h2>🎤 Start Typing by Voice</h2>
@@ -203,18 +192,20 @@
           <option value="mr-IN">Marathi</option></select
         ><br />
         <button id="talkBtn">🎙️ Start Talking</button>
-        <button id="printBtn">🖨️ Print</button><br />
+        <button id="copyBtn">📋 Copy</button>
+        <button id="downloadBtn">⬇️ Download</button>
+        <button id="printBtn">🖨️ Print</button>
+        <button id="darkModeBtn">🌓 Dark Mode</button><br />
         <textarea
           id="output"
           placeholder="Your speech will appear here..."
         ></textarea>
+        <p id="counter">Words: 0 | Characters: 0</p>
         <canvas id="visualizer" width="300" height="100"></canvas>
       </div>
     </section>
 
-    <!-- SCRIPT -->
     <script>
-      // SLIDER
       const slides = document.querySelectorAll(".carousel img");
       const dots = document.querySelectorAll(".dot");
       let currentSlide = 0;
@@ -230,7 +221,6 @@
         currentSlide = (currentSlide + 1) % slides.length;
         showSlide(currentSlide);
       }
-
       setInterval(nextSlide, 4000);
 
       dots.forEach((dot, index) => {
@@ -240,10 +230,13 @@
         });
       });
 
-      // VOICE TO TEXT
       const talkBtn = document.getElementById("talkBtn");
       const printBtn = document.getElementById("printBtn");
+      const copyBtn = document.getElementById("copyBtn");
+      const downloadBtn = document.getElementById("downloadBtn");
+      const darkModeBtn = document.getElementById("darkModeBtn");
       const output = document.getElementById("output");
+      const counter = document.getElementById("counter");
       const languageSelect = document.getElementById("languageSelect");
       const canvas = document.getElementById("visualizer");
       const ctx = canvas.getContext("2d");
@@ -251,6 +244,15 @@
       let recognition, audioCtx, analyser, source;
       let running = false;
       let fullText = "";
+
+      function updateCounter() {
+        const text = output.value.trim();
+        const words = text === "" ? 0 : text.split(/\s+/).length;
+        const chars = text.length;
+        counter.textContent = `Words: ${words} | Characters: ${chars}`;
+      }
+
+      output.addEventListener("input", updateCounter);
 
       function startSpeechRecognition() {
         if (!("webkitSpeechRecognition" in window)) {
@@ -267,8 +269,6 @@
           let interim = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             let transcript = event.results[i][0].transcript.toLowerCase();
-
-            // Replace commands with punctuation
             transcript = transcript
               .replace(/\bfull stop\b/g, ".")
               .replace(/\bcomma\b/g, ",")
@@ -281,6 +281,7 @@
             else interim += transcript;
           }
           output.value = fullText + interim;
+          updateCounter();
         };
 
         recognition.onerror = (event) => {
@@ -319,7 +320,6 @@
                 );
               }
             }
-
             draw();
           })
           .catch((err) => {
@@ -348,6 +348,27 @@
         win.document.write(`<pre>${output.value}</pre>`);
         win.document.close();
         win.print();
+      };
+
+      copyBtn.onclick = () => {
+        navigator.clipboard.writeText(output.value).then(() => {
+          alert("Copied to clipboard!");
+        });
+      };
+
+      downloadBtn.onclick = () => {
+        const blob = new Blob([output.value], { type: "text/plain" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "transcript.txt";
+        link.click();
+      };
+
+      darkModeBtn.onclick = () => {
+        document.body.classList.toggle("dark-mode");
+        darkModeBtn.innerText = document.body.classList.contains("dark-mode")
+          ? "🌞 Light Mode"
+          : "🌓 Dark Mode";
       };
     </script>
   </body>
