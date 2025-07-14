@@ -3,23 +3,56 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voice to Text Demo</title>
+    <title>TalknType - Voice to Text</title>
     <style>
-      body {
-        font-family: Arial, sans-serif;
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
         background-color: #f4f4f4;
       }
+
+      .slider {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+      }
+
+      .slider-container {
+        width: 100%;
+        height: 100%;
+        position: relative;
+      }
+
+      .slider-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+      }
+
+      .slider-container img.active {
+        opacity: 1;
+      }
+
       header {
+        background: white;
         text-align: center;
-        padding: 10px;
-        background-color: #fff;
-      }
-      .logo-container {
+        padding: 20px 0;
         animation: zoomInOut 3s ease-in-out infinite;
-        display: inline-block;
       }
+
       @keyframes zoomInOut {
         0%,
         100% {
@@ -29,240 +62,130 @@
           transform: scale(1.1);
         }
       }
+
       header img {
         max-width: 150px;
       }
-      .slider {
-        width: 100%;
-        padding: 0 5px;
-        box-sizing: border-box;
-        overflow: hidden;
-        background: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .slider-container {
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        position: relative;
-      }
-      .slider-container img {
-        width: 100%;
-        height: 80%;
-        object-fit: contain;
-        position: absolute;
-        opacity: 0;
-        transition: opacity 1s ease-in-out;
-      }
-      .slider-container img.active {
-        opacity: 1;
-      }
-      .about {
-        padding: 60px 20px;
-        background: linear-gradient(135deg, #ffffff, #f0f0f0);
-        text-align: center;
-        position: relative;
-      }
-      .about::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear-gradient(to right, #4caf50, #81c784);
-      }
-      .about h2 {
-        font-size: 36px;
-        color: #333;
-        margin-bottom: 20px;
-      }
-      .about p {
-        font-size: 20px;
-        color: #555;
-        max-width: 800px;
-        margin: 0 auto;
-        line-height: 1.6;
-      }
+
       .voice-box {
-        padding: 60px 20px;
-        background: #fafafa;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .voice-container {
-        width: 100%;
-        max-width: 900px;
-        background: #ffffff;
-        padding: 40px 30px;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        padding: 40px 20px;
+        background-color: #fff;
         text-align: center;
-        border: 1px solid #e0e0e0;
-        transition: transform 0.3s ease;
       }
-      .voice-container:hover {
-        transform: translateY(-4px);
-      }
-      .voice-container h2 {
-        font-size: 32px;
-        margin-bottom: 20px;
-        color: #2c3e50;
-      }
-      .controls {
-        margin-bottom: 20px;
-      }
-      .controls label {
-        margin-right: 10px;
-        font-size: 16px;
-        color: #555;
-      }
-      select {
-        padding: 8px 16px;
+
+      .voice-container {
+        max-width: 800px;
+        margin: auto;
+        background: #fefefe;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.08);
         border: 1px solid #ccc;
-        border-radius: 8px;
+      }
+
+      h2 {
+        font-size: 24px;
+        margin-bottom: 16px;
+      }
+
+      select,
+      button,
+      textarea {
         font-size: 16px;
-        outline: none;
-        background-color: #f9f9f9;
-        transition: border-color 0.3s ease;
+        margin: 10px 5px;
       }
-      select:focus {
-        border-color: #4caf50;
+
+      select {
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #aaa;
       }
-      .btn-group {
-        margin-top: 20px;
-        margin-bottom: 20px;
-      }
+
       button {
-        padding: 14px 30px;
-        font-size: 16px;
-        font-weight: 600;
-        margin: 8px;
+        padding: 12px 20px;
         border: none;
-        border-radius: 50px;
-        cursor: pointer;
+        border-radius: 30px;
+        background: linear-gradient(to right, #00c9ff, #92fe9d);
         color: white;
-        background: linear-gradient(135deg, #42e695, #3bb2b8);
-        box-shadow: 0 4px 15px rgba(66, 230, 149, 0.3);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+        cursor: pointer;
+        transition: 0.3s ease;
       }
-      button::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: -75%;
-        width: 50%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.2);
-        transform: skewX(-20deg);
-        transition: 0.6s ease-in-out;
-      }
-      button:hover::before {
-        left: 130%;
-      }
+
       button:hover {
         transform: scale(1.05);
-        box-shadow: 0 6px 25px rgba(59, 178, 184, 0.4);
-        background: linear-gradient(135deg, #3bb2b8, #42e695);
       }
+
       textarea {
         width: 100%;
         height: 200px;
         padding: 15px;
-        font-size: 16px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
         resize: vertical;
-        margin-bottom: 20px;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
       }
+
       canvas {
         display: block;
-        margin: 0 auto;
-        border-radius: 8px;
-        background: #222;
+        margin: 20px auto;
+        background: #000;
+        border-radius: 10px;
       }
+
       @media (max-width: 768px) {
-        .slider-container {
-          aspect-ratio: 4 / 3;
-        }
-        .about h2 {
-          font-size: 28px;
-        }
-        .about p {
-          font-size: 18px;
-        }
-      }
-      @media (max-width: 480px) {
         header img {
           max-width: 100px;
         }
-        .voice-container {
-          padding: 30px 15px;
+
+        h2 {
+          font-size: 20px;
         }
-      }
-      .more-info {
-        text-align: center;
-        margin: 20px;
+
+        textarea {
+          height: 150px;
+        }
       }
     </style>
   </head>
   <body>
+    <!-- Slider -->
     <div class="slider">
       <div class="slider-container">
-        <img src="/public/Image.jpg" alt="Slide 1" class="active" />
-        <img src="/public/Image2.jpg" alt="Slide 2" />
+        <img src="Image.jpg" class="active" alt="Slide 1" />
+        <img src="Image2.jpg" alt="Slide 2" />
       </div>
     </div>
+
+    <!-- Logo -->
     <header>
-      <div class="logo-container">
-        <img src="logo.jpg" alt="Logo" />
-      </div>
+      <img src="logo.jpg" alt="TalknType Logo" />
     </header>
 
-    <section class="about">
-      <h2>Focus on clients while TalknType does the paperwork</h2>
-      <p>
-        Fast, fluent, flexible Dragon Legal speech recognition enables you to
-        accurately capture and format specialized legal documentation by
-        voice—at your desk or on the go. Robust legal transcription capabilities
-        and powerful customizations can be easily shared and deployed across a
-        practice or legal department.
-      </p>
-    </section>
-
+    <!-- Voice Typing -->
     <section class="voice-box">
       <div class="voice-container">
         <h2>🎤 Start Typing by Voice</h2>
-        <div class="controls">
-          <label for="languageSelect">Choose Language:</label>
-          <select id="languageSelect">
-            <option value="en-IN">English (India)</option>
-            <option value="hi-IN">Hindi</option>
-            <option value="mr-IN">Marathi</option>
-          </select>
-        </div>
-        <div class="btn-group">
-          <button id="talkBtn">🎙️ Start Talking</button>
-          <button id="printBtn">🖨️ Print</button>
-        </div>
+
+        <select id="languageSelect">
+          <option value="en-IN">English (India)</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="mr-IN">Marathi</option>
+        </select>
+
+        <br />
+
+        <button id="talkBtn">🎙️ Start Talking</button>
+        <button id="printBtn">🖨️ Print</button>
+
+        <br />
+
         <textarea
           id="output"
           placeholder="Your speech will appear here..."
         ></textarea>
+
         <canvas id="visualizer" width="300" height="100"></canvas>
       </div>
     </section>
-
-    <div class="more-info">
-      <button onclick="alert('More information coming soon...')">
-        More Info
-      </button>
-    </div>
 
     <script>
       const talkBtn = document.getElementById("talkBtn");
@@ -272,14 +195,26 @@
       const canvas = document.getElementById("visualizer");
       const ctx = canvas.getContext("2d");
 
-      let recognition;
-      let audioCtx, analyser, source;
+      const slides = document.querySelectorAll(".slider-container img");
+      let slideIndex = 0;
+      let recognition, audioCtx, analyser, source;
       let running = false;
-      let transcriptSoFar = "";
+      let fullText = "";
+
+      function showSlide(i) {
+        slides.forEach((slide, idx) =>
+          slide.classList.toggle("active", idx === i)
+        );
+      }
+
+      setInterval(() => {
+        slideIndex = (slideIndex + 1) % slides.length;
+        showSlide(slideIndex);
+      }, 5000);
 
       function startSpeechRecognition() {
         if (!("webkitSpeechRecognition" in window)) {
-          alert("Speech Recognition not supported. Use Chrome.");
+          alert("Use Google Chrome for best experience.");
           return;
         }
 
@@ -290,21 +225,19 @@
 
         recognition.onresult = (event) => {
           let interim = "";
-
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
-              transcriptSoFar += transcript + " ";
+              fullText += transcript + " ";
             } else {
               interim += transcript;
             }
           }
-
-          output.value = transcriptSoFar + interim;
+          output.value = fullText + interim;
         };
 
         recognition.onerror = (event) => {
-          console.error("Recognition error:", event.error);
+          console.error("Recognition Error:", event.error);
         };
 
         recognition.start();
@@ -343,46 +276,33 @@
 
             draw();
           })
-          .catch((err) => console.error("Microphone access denied:", err));
+          .catch((err) => {
+            alert("Microphone access is required.");
+            console.error("Mic Error:", err);
+          });
       }
 
-      talkBtn.addEventListener("click", () => {
+      talkBtn.onclick = () => {
         if (!running) {
-          transcriptSoFar = output.value;
+          fullText = output.value;
           startSpeechRecognition();
           startAudioVisualization();
-          talkBtn.innerText = "Stop Talking";
+          talkBtn.innerText = "⛔ Stop Talking";
           running = true;
         } else {
-          recognition.stop();
+          recognition && recognition.stop();
           audioCtx && audioCtx.close();
-          talkBtn.innerText = "Start Talking";
+          talkBtn.innerText = "🎙️ Start Talking";
           running = false;
         }
-      });
+      };
 
-      printBtn.addEventListener("click", () => {
-        const printWindow = window.open("", "", "width=600,height=600");
-        printWindow.document.write("<pre>" + output.value + "</pre>");
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-      });
-
-      const slides = document.querySelectorAll(".slider-container img");
-      let index = 0;
-
-      function showSlide(i) {
-        slides.forEach((slide, idx) => {
-          slide.classList.toggle("active", idx === i);
-        });
-      }
-
-      setInterval(() => {
-        index = (index + 1) % slides.length;
-        showSlide(index);
-      }, 5000);
+      printBtn.onclick = () => {
+        const win = window.open("", "", "width=600,height=600");
+        win.document.write(`<pre>${output.value}</pre>`);
+        win.document.close();
+        win.print();
+      };
     </script>
   </body>
 </html>
