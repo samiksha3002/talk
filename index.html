@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TalknType - Voice to Text</title>
+
     <style>
       * {
         margin: 0;
@@ -11,41 +12,59 @@
         box-sizing: border-box;
       }
 
+      html,
       body {
+        width: 100%;
+        height: 100%;
         font-family: Arial, sans-serif;
+        overflow-x: hidden;
         background-color: #f4f4f4;
       }
 
-      .slider {
-        width: 100vw;
+      /* --- SLIDER --- */
+      .carousel {
+        position: relative;
+        width: 100%;
         height: 100vh;
         overflow: hidden;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #000;
       }
 
-      .slider-container {
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
-
-      .slider-container img {
+      .carousel img {
+        position: absolute;
         width: 100%;
         height: 100%;
         object-fit: cover;
-        position: absolute;
         opacity: 0;
         transition: opacity 1s ease-in-out;
       }
 
-      .slider-container img.active {
+      .carousel img.active {
         opacity: 1;
       }
 
+      .carousel-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+      }
+
+      .dot.active {
+        background-color: #fff;
+      }
+
+      /* --- HEADER --- */
       header {
         background: white;
         text-align: center;
@@ -67,6 +86,7 @@
         max-width: 150px;
       }
 
+      /* --- VOICE BOX --- */
       .voice-box {
         padding: 40px 20px;
         background-color: #fff;
@@ -135,32 +155,46 @@
         header img {
           max-width: 100px;
         }
-
         h2 {
           font-size: 20px;
         }
-
         textarea {
           height: 150px;
+        }
+        .carousel {
+          height: 60vh;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .carousel {
+          height: 50vh;
         }
       }
     </style>
   </head>
+
   <body>
-    <!-- Slider -->
-    <div class="slider">
-      <div class="slider-container">
-        <img src="Image.jpg" class="active" alt="Slide 1" />
-        <img src="Image2.jpg" alt="Slide 2" />
+    <!-- SLIDER -->
+    <div class="carousel">
+      <img src="Image.jpg" class="active" alt="Slider 1" />
+      <img src="Image2.jpg" alt="Slider 2" />
+      <img src="images/s3.jpg" alt="Slider 3" />
+      <img src="images/s4.jpg" alt="Slider 4" />
+      <div class="carousel-dots">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
       </div>
     </div>
 
-    <!-- Logo -->
+    <!-- HEADER -->
     <header>
       <img src="logo.jpg" alt="TalknType Logo" />
     </header>
 
-    <!-- Voice Typing -->
+    <!-- VOICE BOX -->
     <section class="voice-box">
       <div class="voice-container">
         <h2>🎤 Start Typing by Voice</h2>
@@ -168,26 +202,49 @@
         <select id="languageSelect">
           <option value="en-IN">English (India)</option>
           <option value="hi-IN">Hindi</option>
-          <option value="mr-IN">Marathi</option>
-        </select>
-
-        <br />
+          <option value="mr-IN">Marathi</option></select
+        ><br />
 
         <button id="talkBtn">🎙️ Start Talking</button>
-        <button id="printBtn">🖨️ Print</button>
-
-        <br />
+        <button id="printBtn">🖨️ Print</button><br />
 
         <textarea
           id="output"
           placeholder="Your speech will appear here..."
         ></textarea>
-
         <canvas id="visualizer" width="300" height="100"></canvas>
       </div>
     </section>
 
+    <!-- SCRIPT -->
     <script>
+      // SLIDER
+      const slides = document.querySelectorAll(".carousel img");
+      const dots = document.querySelectorAll(".dot");
+      let currentSlide = 0;
+
+      function showSlide(index) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle("active", i === index);
+          dots[i].classList.toggle("active", i === index);
+        });
+      }
+
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+
+      setInterval(nextSlide, 4000); // auto-slide
+
+      dots.forEach((dot, index) => {
+        dot.addEventListener("click", () => {
+          currentSlide = index;
+          showSlide(currentSlide);
+        });
+      });
+
+      // VOICE TO TEXT + VISUALIZER
       const talkBtn = document.getElementById("talkBtn");
       const printBtn = document.getElementById("printBtn");
       const output = document.getElementById("output");
@@ -195,22 +252,9 @@
       const canvas = document.getElementById("visualizer");
       const ctx = canvas.getContext("2d");
 
-      const slides = document.querySelectorAll(".slider-container img");
-      let slideIndex = 0;
       let recognition, audioCtx, analyser, source;
       let running = false;
       let fullText = "";
-
-      function showSlide(i) {
-        slides.forEach((slide, idx) =>
-          slide.classList.toggle("active", idx === i)
-        );
-      }
-
-      setInterval(() => {
-        slideIndex = (slideIndex + 1) % slides.length;
-        showSlide(slideIndex);
-      }, 5000);
 
       function startSpeechRecognition() {
         if (!("webkitSpeechRecognition" in window)) {
@@ -227,17 +271,14 @@
           let interim = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
             const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              fullText += transcript + " ";
-            } else {
-              interim += transcript;
-            }
+            if (event.results[i].isFinal) fullText += transcript + " ";
+            else interim += transcript;
           }
           output.value = fullText + interim;
         };
 
         recognition.onerror = (event) => {
-          console.error("Recognition Error:", event.error);
+          console.error("Recognition error:", event.error);
         };
 
         recognition.start();
@@ -259,7 +300,6 @@
             function draw() {
               requestAnimationFrame(draw);
               analyser.getByteFrequencyData(dataArray);
-
               ctx.clearRect(0, 0, canvas.width, canvas.height);
               ctx.fillStyle = "lime";
               const barWidth = canvas.width / bufferLength;
@@ -273,7 +313,6 @@
                 );
               }
             }
-
             draw();
           })
           .catch((err) => {
