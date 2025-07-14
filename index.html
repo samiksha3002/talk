@@ -21,7 +21,7 @@
         background-color: #f4f4f4;
       }
 
-      /* --- SLIDER --- */
+      /* SLIDER */
       .carousel {
         position: relative;
         width: 100%;
@@ -64,7 +64,7 @@
         background-color: #fff;
       }
 
-      /* --- HEADER --- */
+      /* HEADER */
       header {
         background: white;
         text-align: center;
@@ -86,7 +86,7 @@
         max-width: 150px;
       }
 
-      /* --- VOICE BOX --- */
+      /* VOICE BOX */
       .voice-box {
         padding: 40px 20px;
         background-color: #fff;
@@ -155,12 +155,15 @@
         header img {
           max-width: 100px;
         }
+
         h2 {
           font-size: 20px;
         }
+
         textarea {
           height: 150px;
         }
+
         .carousel {
           height: 60vh;
         }
@@ -179,12 +182,8 @@
     <div class="carousel">
       <img src="Image.jpg" class="active" alt="Slider 1" />
       <img src="Image2.jpg" alt="Slider 2" />
-      <img src="images/s3.jpg" alt="Slider 3" />
-      <img src="images/s4.jpg" alt="Slider 4" />
       <div class="carousel-dots">
         <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
         <span class="dot"></span>
       </div>
     </div>
@@ -198,16 +197,13 @@
     <section class="voice-box">
       <div class="voice-container">
         <h2>🎤 Start Typing by Voice</h2>
-
         <select id="languageSelect">
           <option value="en-IN">English (India)</option>
           <option value="hi-IN">Hindi</option>
           <option value="mr-IN">Marathi</option></select
         ><br />
-
         <button id="talkBtn">🎙️ Start Talking</button>
         <button id="printBtn">🖨️ Print</button><br />
-
         <textarea
           id="output"
           placeholder="Your speech will appear here..."
@@ -235,7 +231,7 @@
         showSlide(currentSlide);
       }
 
-      setInterval(nextSlide, 4000); // auto-slide
+      setInterval(nextSlide, 4000);
 
       dots.forEach((dot, index) => {
         dot.addEventListener("click", () => {
@@ -244,7 +240,7 @@
         });
       });
 
-      // VOICE TO TEXT + VISUALIZER
+      // VOICE TO TEXT
       const talkBtn = document.getElementById("talkBtn");
       const printBtn = document.getElementById("printBtn");
       const output = document.getElementById("output");
@@ -270,7 +266,17 @@
         recognition.onresult = (event) => {
           let interim = "";
           for (let i = event.resultIndex; i < event.results.length; ++i) {
-            const transcript = event.results[i][0].transcript;
+            let transcript = event.results[i][0].transcript.toLowerCase();
+
+            // Replace commands with punctuation
+            transcript = transcript
+              .replace(/\bfull stop\b/g, ".")
+              .replace(/\bcomma\b/g, ",")
+              .replace(/\bquestion mark\b/g, "?")
+              .replace(/\bexclamation mark\b/g, "!")
+              .replace(/\bnext line\b/g, "\n")
+              .replace(/\bnext paragraph\b/g, "\n\n");
+
             if (event.results[i].isFinal) fullText += transcript + " ";
             else interim += transcript;
           }
@@ -313,6 +319,7 @@
                 );
               }
             }
+
             draw();
           })
           .catch((err) => {
